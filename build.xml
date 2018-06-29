@@ -1,0 +1,119 @@
+<project name="batchJobs" default="compile">
+    <property name="srcdir" value="src"/>
+    <property name="classdir" value="bin"/>
+    <property name="builder" value="Netarchivesuite"/>
+	<tstamp>
+	   <format property="TODAY" pattern="dd-MM-yyyy"/>
+	</tstamp>
+    <property name="version.num" value="1.0.0"/>
+<property name="jarclasspath" value="
+	common-core-5.4.jar
+	deploy-core-5.4.jar
+        archive-core-5.4.jar
+        commons-cli-1.1.jar
+        commons-io-2.0.1.jar
+        jms-4.4.1.jar
+	droid.jar
+	jhove/jhove-1.1.jar
+        jhove/jhove-module-1.1.jar
+	jwat-common-1.0.4.jar
+        heritrix-1.14.4.jar
+	cop-digester.jar 
+	dom4j-1.5.2.jar   
+	log4j-1.2.15.jar
+   	"/>
+    <property name="toolclasspath" value="${jarclasspath} "/>
+    <property name="build.classes.excludes" value="overview.html,*/doc-files/,*/diagram-files/,/package.html"/>
+    <path id="jars.path">
+        <pathelement path="${classdir}"/>
+        <fileset dir="lib">
+            <patternset id="jars.path.set">
+	       <include name="common-core-5.4.jar"/>
+	       <include name="deploy-core-5.4.jar"/>
+               <include name="archive-core-5.4.jar"/>
+            	<include name="droid.jar"/>
+		<include name="jhove/jhove-1.1.jar"/>
+                <include name="jhove/jhove-module-1.1.jar"/>  
+            	<include name="jwat-common-1.0.4.jar"/>
+            	<include name="dom4j-1.5.2.jar"/>
+            	<include name="commons-cli-1.1.jar"/>
+            	<include name="commons-io-2.0.1.jar"/>
+		<include name="jms-4.4.1.jar"/>
+            	<include name="heritrix-1.14.4.jar"/>
+            	<include name="log4j-1.2.15.jar"/>
+            </patternset>
+        </fileset>
+    </path>
+
+	<target name="clean" 
+            description="Remove all compiled code and generated wars and jars">
+        <delete dir="${classdir}/dk"/>
+		<delete dir="${classdir}/org"/>
+        <delete dir="${report.dir}"/>
+        <delete verbose="false">
+           <fileset dir="lib">
+              <include name="mets.jar"/>
+           </fileset>
+        </delete>
+    </target>
+
+    <target name="compile"
+            description="Compile all production classes, and copy properties to class dir">
+        <!-- ensure output dir exists -->
+        <mkdir dir="${classdir}"/>
+        <javac source="1.7" srcdir="${srcdir}" destdir="${classdir}" debug="on"
+               encoding="UTF-8">
+            <classpath refid="jars.path"/>
+        </javac>
+        <copy todir="${classdir}">
+            <fileset dir="${srcdir}">
+            	<!-- adding Translations*.properties files -->
+            	<include name="**/*.properties"/>
+            	<!-- adding default settings files -->
+            	<include name="**/*.xml"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="compileclean" depends="clean,compile"
+            description="Clean up before doing a compile">
+    </target>
+
+    <target name="jarfiles"
+            depends="clean, batchjobsjar, batchprogsjar, allprogsjar"
+            description="Compile all jar files">
+    </target>
+
+    <target name="batchjobsjar" depends="compileclean"
+            description="Build a batchjobs jar file with all required libs in the manifest class path">
+        <jar destfile="BatchJobs-${version.num}.jar" basedir="${classdir}" update="no">
+            <include name="batchjobs/**/*.class"/>
+            <manifest>
+                <attribute name="Builder" value="${builder}"/>
+                <attribute name="Class-Path" value="${jarclasspath}"/>
+            </manifest>
+        </jar>
+    </target>
+    <target name="batchprogsjar" depends="compileclean"
+            description="Build a BatchProgs jar file with all required libs in the manifest class path">
+        <jar destfile="BatchProgs-${version.num}.jar" basedir="${classdir}" update="no">
+            <include name="batchprogs/**/*.class"/>
+            <manifest>
+                <attribute name="Builder" value="${builder}"/>
+                <attribute name="Class-Path" value="${jarclasspath}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="allprogsjar" depends="compileclean"
+            description="Build a AllBatchProgs jar file with all required libs in the manifest class path">
+        <jar destfile="AllBatchProgs-${version.num}.jar" basedir="${classdir}" update="no">
+            <include name="*/**/*.class"/>
+            <manifest>
+                <attribute name="Builder" value="${builder}"/>
+                <attribute name="Class-Path" value="${jarclasspath}"/>
+            </manifest>
+        </jar>
+    </target>
+</project>
+
